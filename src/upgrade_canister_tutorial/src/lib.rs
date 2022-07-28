@@ -7,17 +7,26 @@ use candid::{
 use ic_cdk::{export::serde::Serialize, println};
 use ic_cdk_macros::{post_upgrade, pre_upgrade};
 
-const VERSION: &str = "0.4";
+const VERSION: &str = "0.5";
 
 #[derive(Debug, Default, Clone, CandidType, Serialize, Deserialize)]
 pub struct Student {
     name: String,
     age: u16,
+    sex: String,
 }
 
 impl Student {
     fn new(name: String, age: u16) -> Self {
-        Self { name, age }
+        Self {
+            name,
+            age,
+            sex: String::from("male"),
+        }
+    }
+
+    fn new_with_sex(name: String, age: u16, sex: String) -> Self {
+        Self { name, age, sex }
     }
 }
 
@@ -29,6 +38,10 @@ impl Student {
     fn set_age(&mut self, age: u16) {
         self.age = age;
     }
+
+    fn set_sex(&mut self, sex: String) {
+        self.sex = sex;
+    }
 }
 
 impl ArgumentEncoder for Student {
@@ -36,6 +49,7 @@ impl ArgumentEncoder for Student {
         println!("encode for Student {}", VERSION);
         ser.arg(&self.name)?;
         ser.arg(&self.age)?;
+        ser.arg(&self.sex)?;
         Ok(())
     }
 }
@@ -45,7 +59,9 @@ impl<'de> ArgumentDecoder<'de> for Student {
         println!("decode for Student {}", VERSION);
         Ok(Student {
             name: de.get_value()?,
-            age: de.get_value().unwrap_or_default(),
+            age: de.get_value()?,
+            // sex: de.get_value().unwrap_or_default(),
+            sex: String::from("male"),
         })
     }
 }
@@ -64,6 +80,7 @@ impl<'de> ArgumentDecoder<'de> for MaybeStable {
         println!("decode for MaybeStable {}", VERSION);
         let mut v = vec![];
         while let Ok(s) = Student::decode(de) {
+            println!("{:?}", s);
             v.push(s);
         }
         Ok(MaybeStable(v))
@@ -91,8 +108,22 @@ fn set_age(age: u16) {
 }
 
 #[ic_cdk_macros::update]
+fn set_sex(sex: String) {
+    STUDENT.with(|s| s.borrow_mut().set_sex(sex))
+}
+
+#[ic_cdk_macros::update]
 fn new_student(name: String, age: u16) {
     CLASS.with(|class| class.borrow_mut().push(Student::new(name, age)))
+}
+
+#[ic_cdk_macros::update]
+fn new_student_with_sex(name: String, age: u16, sex: String) {
+    CLASS.with(|class| {
+        class
+            .borrow_mut()
+            .push(Student::new_with_sex(name, age, sex))
+    })
 }
 
 #[pre_upgrade]

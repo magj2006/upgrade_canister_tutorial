@@ -3,4 +3,5 @@ service : {
     "set_name": (text) -> () ;
     "set_age": (nat16) -> () ;
     "new_student": (text, nat16) -> () ;
+    "new_student_with_sex": (text, nat16, text) -> () ;
 }
