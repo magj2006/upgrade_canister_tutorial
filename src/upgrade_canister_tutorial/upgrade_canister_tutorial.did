@@ -4,4 +4,5 @@ service : {
     "set_age": (nat16) -> () ;
     "new_student": (text, nat16) -> () ;
     "new_student_with_sex": (text, nat16, text) -> () ;
+    "new_student_with_id": (text, nat16, text, nat16) -> () ;
 }
