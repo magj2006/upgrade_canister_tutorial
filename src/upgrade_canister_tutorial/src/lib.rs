@@ -7,13 +7,14 @@ use candid::{
 use ic_cdk::{export::serde::Serialize, println};
 use ic_cdk_macros::{post_upgrade, pre_upgrade};
 
-const VERSION: &str = "0.5";
+const VERSION: &str = "0.7";
 
 #[derive(Debug, Default, Clone, CandidType, Serialize, Deserialize)]
 pub struct Student {
     name: String,
     age: u16,
     sex: String,
+    id: u16,
 }
 
 impl Student {
@@ -22,11 +23,21 @@ impl Student {
             name,
             age,
             sex: String::from("male"),
+            id: 0,
         }
     }
 
     fn new_with_sex(name: String, age: u16, sex: String) -> Self {
-        Self { name, age, sex }
+        Self {
+            name,
+            age,
+            sex,
+            id: 0,
+        }
+    }
+
+    fn new_with_id(name: String, age: u16, sex: String, id: u16) -> Self {
+        Self { name, age, sex, id }
     }
 }
 
@@ -50,6 +61,7 @@ impl ArgumentEncoder for Student {
         ser.arg(&self.name)?;
         ser.arg(&self.age)?;
         ser.arg(&self.sex)?;
+        ser.arg(&self.id)?;
         Ok(())
     }
 }
@@ -60,30 +72,38 @@ impl<'de> ArgumentDecoder<'de> for Student {
         Ok(Student {
             name: de.get_value()?,
             age: de.get_value()?,
-            // sex: de.get_value().unwrap_or_default(),
-            sex: String::from("male"),
+            sex: de.get_value()?,
+            id: de.get_value()?,
         })
     }
 }
 
-pub struct MaybeStable(Vec<Student>);
+pub struct MaybeStable(Vec<Student>, (usize, Vec<Student>));
 
 impl ArgumentEncoder for MaybeStable {
     fn encode(self, ser: &mut candid::ser::IDLBuilder) -> candid::Result<()> {
         println!("encode for MaybeStable {}", VERSION);
-        self.0.into_iter().map(|s| s.encode(ser)).collect()
+        match VERSION {
+            "0.6" => self.0.into_iter().map(|s| s.encode(ser)).collect(),
+            _ => {
+                ser.arg(&self.1 .0)?;
+
+                self.1 .1.into_iter().map(|s| s.encode(ser)).collect()
+            }
+        }
     }
 }
 
 impl<'de> ArgumentDecoder<'de> for MaybeStable {
     fn decode(de: &mut candid::de::IDLDeserialize<'de>) -> candid::Result<Self> {
         println!("decode for MaybeStable {}", VERSION);
-        let mut v = vec![];
+        let v0 = vec![];
+        let mut v1 = vec![];
         while let Ok(s) = Student::decode(de) {
             println!("{:?}", s);
-            v.push(s);
+            v1.push(s);
         }
-        Ok(MaybeStable(v))
+        Ok(MaybeStable(v0, (v1.len(), v1)))
     }
 }
 
@@ -126,12 +146,22 @@ fn new_student_with_sex(name: String, age: u16, sex: String) {
     })
 }
 
+#[ic_cdk_macros::update]
+fn new_student_with_id(name: String, age: u16, sex: String, id: u16) {
+    CLASS.with(|class| {
+        class
+            .borrow_mut()
+            .push(Student::new_with_id(name, age, sex, id))
+    })
+}
+
 #[pre_upgrade]
 fn pre_upgrade() {
     println!("pre version {}", VERSION);
 
     // let ms = MaybeStable(STUDENT.with(|s| s.borrow().clone()));
-    let ms = MaybeStable(CLASS.with(|class| class.borrow().clone()));
+    let v = vec![];
+    let ms = MaybeStable(CLASS.with(|class| class.borrow().clone()), (v.len(), v));
     ic_cdk::storage::stable_save(ms).expect("stable save")
 }
 
@@ -140,6 +170,6 @@ fn post_upgrade() {
     println!("post version {}", VERSION);
 
     let ms = ic_cdk::storage::stable_restore::<MaybeStable>().expect("stable restore");
-    CLASS.with(|class| *class.borrow_mut() = ms.0);
+    CLASS.with(|class| *class.borrow_mut() = ms.1 .1);
     // STUDENT.with(|s| *s.borrow_mut() = ms.0);
 }
