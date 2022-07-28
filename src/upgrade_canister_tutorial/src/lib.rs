@@ -7,13 +7,15 @@ use candid::{
 use ic_cdk::{export::serde::Serialize, println};
 use ic_cdk_macros::{post_upgrade, pre_upgrade};
 
-const VERSION: &str = "0.5";
+const VERSION: &str = "0.6";
+
 
 #[derive(Debug, Default, Clone, CandidType, Serialize, Deserialize)]
 pub struct Student {
     name: String,
     age: u16,
     sex: String,
+    id: u16,
 }
 
 impl Student {
@@ -22,11 +24,22 @@ impl Student {
             name,
             age,
             sex: String::from("male"),
+            id: 0,
         }
     }
 
     fn new_with_sex(name: String, age: u16, sex: String) -> Self {
-        Self { name, age, sex }
+
+        Self {
+            name,
+            age,
+            sex,
+            id: 0,
+        }
+    }
+
+    fn new_with_id(name: String, age: u16, sex: String, id: u16) -> Self {
+        Self { name, age, sex, id }
     }
 }
 
@@ -50,6 +63,8 @@ impl ArgumentEncoder for Student {
         ser.arg(&self.name)?;
         ser.arg(&self.age)?;
         ser.arg(&self.sex)?;
+        ser.arg(&self.id)?;
+
         Ok(())
     }
 }
@@ -60,8 +75,8 @@ impl<'de> ArgumentDecoder<'de> for Student {
         Ok(Student {
             name: de.get_value()?,
             age: de.get_value()?,
-            // sex: de.get_value().unwrap_or_default(),
-            sex: String::from("male"),
+            sex: de.get_value()?,
+            id: 0,
 
         })
     }
@@ -126,6 +141,16 @@ fn new_student_with_sex(name: String, age: u16, sex: String) {
             .push(Student::new_with_sex(name, age, sex))
     })
 }
+
+#[ic_cdk_macros::update]
+fn new_student_with_id(name: String, age: u16, sex: String, id: u16) {
+    CLASS.with(|class| {
+        class
+            .borrow_mut()
+            .push(Student::new_with_id(name, age, sex, id))
+    })
+}
+
 
 #[pre_upgrade]
 fn pre_upgrade() {
