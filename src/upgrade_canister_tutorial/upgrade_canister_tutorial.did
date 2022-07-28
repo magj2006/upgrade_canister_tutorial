@@ -1,3 +1,4 @@
 service : {
     "greet": () -> (text) query;
+    "set_name": (text) -> () ;
 }
