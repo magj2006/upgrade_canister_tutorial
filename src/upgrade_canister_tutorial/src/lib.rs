@@ -29,7 +29,7 @@ impl ArgumentEncoder for Student {
     fn encode(self, ser: &mut candid::ser::IDLBuilder) -> candid::Result<()> {
         println!("encode for Student {}", VERSION);
         ser.arg(&self.name)?;
-
+        ser.arg(&self.age)?;
         Ok(())
     }
 }
