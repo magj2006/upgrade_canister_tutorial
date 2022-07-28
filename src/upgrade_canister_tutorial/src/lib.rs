@@ -7,16 +7,21 @@ use candid::{
 use ic_cdk::{export::serde::Serialize, println};
 use ic_cdk_macros::{post_upgrade, pre_upgrade};
 
-const VERSION: &str = "0.1";
+const VERSION: &str = "0.2";
 
 #[derive(Debug, Default, Clone, CandidType, Serialize, Deserialize)]
 pub struct Student {
     name: String,
+    age: u16,
 }
 
 impl Student {
     fn set_name(&mut self, name: String) {
         self.name = name;
+    }
+
+    fn set_age(&mut self, age: u16) {
+        self.age = age;
     }
 }
 
@@ -34,6 +39,7 @@ impl<'de> ArgumentDecoder<'de> for Student {
         println!("decode for Student {}", VERSION);
         Ok(Student {
             name: de.get_value()?,
+            age: de.get_value().unwrap_or_default(),
         })
     }
 }
@@ -67,6 +73,11 @@ fn greet() -> String {
 #[ic_cdk_macros::update]
 fn set_name(name: String) {
     STUDENT.with(|s| s.borrow_mut().set_name(name))
+}
+
+#[ic_cdk_macros::update]
+fn set_age(age: u16) {
+    STUDENT.with(|s| s.borrow_mut().set_age(age))
 }
 
 #[pre_upgrade]
