@@ -1,26 +1,6 @@
 # upgrade_canister_tutorial
 
-Welcome to your new upgrade_canister_tutorial project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
-
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
-
-To learn more before you start working with upgrade_canister_tutorial, see the following documentation available online:
-
-- [Quick Start](https://smartcontracts.org/docs/quickstart/quickstart-intro.html)
-- [SDK Developer Tools](https://smartcontracts.org/docs/developers-guide/sdk-guide.html)
-- [Rust Canister Devlopment Guide](https://smartcontracts.org/docs/rust-guide/rust-intro.html)
-- [ic-cdk](https://docs.rs/ic-cdk)
-- [ic-cdk-macros](https://docs.rs/ic-cdk-macros)
-- [Candid Introduction](https://smartcontracts.org/docs/candid-guide/candid-intro.html)
-- [JavaScript API Reference](https://erxue-5aaaa-aaaab-qaagq-cai.raw.ic0.app)
-
-If you want to start working on your project right away, you might want to try the following commands:
-
-```bash
-cd upgrade_canister_tutorial/
-dfx help
-dfx config --help
-```
+As you know it's hard to upgrade one canister in IC blockchain, I will performance how to upgrade one canister written by rust language step by step.
 
 ## Running the project locally
 
@@ -35,3 +15,13 @@ dfx deploy
 ```
 
 Once the job completes, your application will be available at `http://localhost:8000?canisterId={asset_canister_id}`.
+
+v0.1: We have one Student struct, it only contains name field. and there are two method in canister, which one is greet for getting Student information and another is set_name for setting name of student.
+
+<img width="662" alt="截屏2022-07-28 10 44 43" src="https://user-images.githubusercontent.com/8394789/181408974-a29774dd-32c1-4e0d-bc64-eb8d64e55ea5.png">
+
+you can call set_name and greet then check output.
+
+<img width="394" alt="截屏2022-07-28 10 45 53" src="https://user-images.githubusercontent.com/8394789/181409110-e6ba2585-9631-492a-a729-11512500b8c9.png">
+
+
