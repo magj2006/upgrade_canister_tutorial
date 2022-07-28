@@ -1,0 +1,36 @@
+{
+  "canisters": {
+    "upgrade_canister_tutorial": {
+      "candid": "src/upgrade_canister_tutorial/upgrade_canister_tutorial.did",
+      "package": "upgrade_canister_tutorial",
+      "type": "rust"
+    },
+    "upgrade_canister_tutorial_assets": {
+      "dependencies": [
+        "upgrade_canister_tutorial"
+      ],
+      "frontend": {
+        "entrypoint": "src/upgrade_canister_tutorial_assets/src/index.html"
+      },
+      "source": [
+        "src/upgrade_canister_tutorial_assets/assets",
+        "dist/upgrade_canister_tutorial_assets/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "dfx": "0.9.3",
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}

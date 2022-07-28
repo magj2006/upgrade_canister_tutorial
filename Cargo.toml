@@ -1,0 +1,4 @@
+[workspace]
+members = [
+    "src/upgrade_canister_tutorial",
+]
