@@ -9,6 +9,7 @@ use ic_cdk_macros::{post_upgrade, pre_upgrade};
 
 const VERSION: &str = "0.7";
 
+
 #[derive(Debug, Default, Clone, CandidType, Serialize, Deserialize)]
 pub struct Student {
     name: String,
@@ -28,6 +29,7 @@ impl Student {
     }
 
     fn new_with_sex(name: String, age: u16, sex: String) -> Self {
+
         Self {
             name,
             age,
@@ -62,6 +64,7 @@ impl ArgumentEncoder for Student {
         ser.arg(&self.age)?;
         ser.arg(&self.sex)?;
         ser.arg(&self.id)?;
+
         Ok(())
     }
 }
@@ -74,6 +77,7 @@ impl<'de> ArgumentDecoder<'de> for Student {
             age: de.get_value()?,
             sex: de.get_value()?,
             id: de.get_value()?,
+
         })
     }
 }
@@ -102,6 +106,7 @@ impl<'de> ArgumentDecoder<'de> for MaybeStable {
         while let Ok(s) = Student::decode(de) {
             println!("{:?}", s);
             v1.push(s);
+
         }
         Ok(MaybeStable(v0, (v1.len(), v1)))
     }
@@ -154,6 +159,7 @@ fn new_student_with_id(name: String, age: u16, sex: String, id: u16) {
             .push(Student::new_with_id(name, age, sex, id))
     })
 }
+
 
 #[pre_upgrade]
 fn pre_upgrade() {
