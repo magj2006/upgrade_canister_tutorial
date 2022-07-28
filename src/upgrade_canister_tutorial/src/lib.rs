@@ -60,7 +60,9 @@ impl<'de> ArgumentDecoder<'de> for Student {
         Ok(Student {
             name: de.get_value()?,
             age: de.get_value()?,
-            sex: de.get_value().unwrap_or_default(),
+            // sex: de.get_value().unwrap_or_default(),
+            sex: String::from("male"),
+
         })
     }
 }
